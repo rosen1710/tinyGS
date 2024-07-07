@@ -236,6 +236,7 @@ private:
   };
 
   ConfigManager();
+  void handleGetAll();
   void handleRoot();
   void handleDashboard();
   void handleRefreshConsole();

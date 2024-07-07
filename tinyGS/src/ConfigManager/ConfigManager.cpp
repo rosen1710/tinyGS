@@ -83,6 +83,7 @@ ConfigManager::ConfigManager()
  #endif
   })
 {
+  // server.on("/get_all", [this] { handleGetAll(); });
   server.on(ROOT_URL, [this] { handleRoot(); });
   server.on(CONFIG_URL, [this] { handleConfig(); });
   server.on(DASHBOARD_URL, [this] { handleDashboard(); });
@@ -127,6 +128,44 @@ ConfigManager::ConfigManager()
   addParameterGroup(&groupAdvanced);
 }
 
+void ConfigManager::handleGetAll()
+{
+  // // -- Let IotWebConf2 test and handle captive portal requests.
+  // if (handleCaptivePortal())
+  // {
+  //   // -- Captive portal request were already served.
+  //   return;
+  // }
+
+  // if (getState() == IOTWEBCONF_STATE_ONLINE)
+  // {
+  //   // -- Authenticate
+  //   if (!server.authenticate(IOTWEBCONF_ADMIN_USER_NAME, getApPasswordParameter()->valueBuffer))
+  //   {
+  //     IOTWEBCONF_DEBUG_LINE(F("Requesting authentication."));
+  //     server.requestAuthentication();
+  //     return;
+  //   }
+  // }
+
+  String string = String(FPSTR("{\"message\":\"Packets were fetched successfully\",\"packets\":["));
+  for (size_t i = 0; i < status.allPackets.size(); i++)
+  {
+    string += "{\"time\":\"" + status.allPackets.at(i).time
+      + "\",\"rssi\":" + status.allPackets.at(i).rssi
+      + ",\"snr\":" + status.allPackets.at(i).snr
+      + ",\"frequencyerror\":" + status.allPackets.at(i).frequencyerror
+      + ",\"crc_error\":" + status.allPackets.at(i).crc_error
+      + "}";
+    if (i < status.allPackets.size() - 1)
+    {
+      string += ",";
+    }
+  }
+  string += "]}";
+  server.send(200, "application/json; charset=UTF-8", string);
+}
+
 void ConfigManager::handleRoot()
 {
   // -- Let IotWebConf2 test and handle captive portal requests.
@@ -149,7 +188,7 @@ void ConfigManager::handleRoot()
 
   s.replace("{v}", FPSTR(TITLE_TEXT));
 
-  server.sendHeader("Content-Length", String(s.length()));
+  // server.sendHeader("Content-Length", String(s.length()));
   server.send(200, "text/html; charset=UTF-8", s);
 }
 
@@ -256,7 +295,7 @@ void ConfigManager::handleDashboard()
 
   s.replace("{v}", FPSTR(TITLE_TEXT));
 
-  server.sendHeader("Content-Length", String(s.length()));
+  // server.sendHeader("Content-Length", String(s.length()));
   server.send(200, "text/html; charset=UTF-8", s);
 }
 
@@ -443,7 +482,7 @@ void ConfigManager::handleRestart()
 
   s.replace("{v}", FPSTR(TITLE_TEXT));
 
-  server.sendHeader("Content-Length", String(s.length()));
+  // server.sendHeader("Content-Length", String(s.length()));
   server.send(200, "text/html; charset=UTF-8", s);
   delay(100);
   ESP.restart();

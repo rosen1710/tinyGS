@@ -24,6 +24,8 @@
 #ifndef Status_h
 #define Status_h
 
+#include <vector>
+
 struct PacketInfo {
   String time = "Waiting";
   float rssi = 0;
@@ -73,6 +75,7 @@ struct Status {
   bool radio_ready = false;
   int16_t radio_error = 0;
   PacketInfo lastPacketInfo;
+  std::vector<PacketInfo> allPackets;
   ModemInfo modeminfo;
   float satPos[2] = {0, 0};
   uint8_t remoteTextFrameLength[4] = {0, 0, 0, 0};
