@@ -83,7 +83,8 @@ ConfigManager::ConfigManager()
  #endif
   })
 {
-  // server.on("/get_all", [this] { handleGetAll(); });
+  server.on("/radioBegin", [this] { handleRadioBegin(); });
+  server.on("/packets", [this] { handleGetAllPackets(); });
   server.on(ROOT_URL, [this] { handleRoot(); });
   server.on(CONFIG_URL, [this] { handleConfig(); });
   server.on(DASHBOARD_URL, [this] { handleDashboard(); });
@@ -128,26 +129,20 @@ ConfigManager::ConfigManager()
   addParameterGroup(&groupAdvanced);
 }
 
-void ConfigManager::handleGetAll()
+void ConfigManager::handleRadioBegin()
 {
-  // // -- Let IotWebConf2 test and handle captive portal requests.
-  // if (handleCaptivePortal())
-  // {
-  //   // -- Captive portal request were already served.
-  //   return;
-  // }
+  if (Radio::getInstance().begin() == 0)
+  {
+    server.send(200, "application/json; charset=UTF-8", "{\"message\":\"Radio begun successfully\"}");
+    Log::console(PSTR("Radio begun successfully"));
+    return;
+  }
+  server.send(200, "application/json; charset=UTF-8", "{\"message\":\"An error occurred while trying to start the Radio\"}");
+  Log::console(PSTR("An error occurred while trying to start the Radio"));
+}
 
-  // if (getState() == IOTWEBCONF_STATE_ONLINE)
-  // {
-  //   // -- Authenticate
-  //   if (!server.authenticate(IOTWEBCONF_ADMIN_USER_NAME, getApPasswordParameter()->valueBuffer))
-  //   {
-  //     IOTWEBCONF_DEBUG_LINE(F("Requesting authentication."));
-  //     server.requestAuthentication();
-  //     return;
-  //   }
-  // }
-
+void ConfigManager::handleGetAllPackets()
+{
   String string = String(FPSTR("{\"message\":\"Packets were fetched successfully\",\"packets\":["));
   for (size_t i = 0; i < status.allPackets.size(); i++)
   {
@@ -164,6 +159,7 @@ void ConfigManager::handleGetAll()
   }
   string += "]}";
   server.send(200, "application/json; charset=UTF-8", string);
+  Log::console(PSTR("Endpoint /packets was requested and handled successfully"));
 }
 
 void ConfigManager::handleRoot()
