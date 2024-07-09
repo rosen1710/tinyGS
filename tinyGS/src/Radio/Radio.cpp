@@ -38,6 +38,23 @@ bool noisyInterrupt = false;
 
 bool allow_decode=true;
 
+std::string hexToASCII(std::string hex)
+{
+  std::string ascii = "";
+  for (size_t i = 0; i < hex.length(); i += 2)
+  {
+    // extract two characters from hex string
+    std::string part = hex.substr(i, 2);
+
+    // change it into base 16 and typecast as the character
+    char ch = (char) strtol(part.c_str(), nullptr, 16);
+
+    // add this char to final ASCII string
+    ascii += ch;
+  }
+  return ascii;
+}
+
 Radio::Radio()
 #if CONFIG_IDF_TARGET_ESP32S3
   : spi(HSPI)
@@ -309,20 +326,22 @@ uint8_t Radio::listen()
     // read optional data
     Log::console(PSTR("Packet (%u bytes):"), respLen);
     uint16_t buffSize = respLen * 2 + 1;
-    if (buffSize > 255)
-      buffSize = 255;
+    // if (buffSize > 255)
+    //   buffSize = 255;
     char *byteStr = new char[buffSize];
     for (int i = 0; i < respLen; i++)
     {
       sprintf(byteStr + i * 2 % (buffSize - 1), "%02x", respFrame[i]);
-      if (i * 2 % buffSize == buffSize - 3 || i == respLen - 1)
-        Log::console(PSTR("%s"), byteStr); // print before the buffer is going to loop back
+      if (i * 2 % buffSize == buffSize - 3 || i == respLen - 1) {
+        Log::console(PSTR("\tEncoded: %s"), byteStr); // print before the buffer is going to loop back
+      }
     }
+    Log::console(PSTR("\tDecoded: %s"), hexToASCII(std::string(byteStr)).c_str());
     delete[] byteStr;
 
-       if (allow_decode){
+    if (allow_decode) {
       String modo=status.modeminfo.modem_mode;
-      if (modo=="FSK"){
+      if (modo=="FSK") {
         int bytes_sincro=0;
           for (int i=0;i<sizeof(status.modeminfo.fsw);i++){
             if (status.modeminfo.fsw[i]!=0){bytes_sincro++;}

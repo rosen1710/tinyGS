@@ -131,10 +131,16 @@ ConfigManager::ConfigManager()
 
 void ConfigManager::handleRadioBegin()
 {
+  if (!Radio::getInstance().isReady())
+  {
+    server.send(200, "application/json; charset=UTF-8", "{\"message\":\"Radio is not ready to begin\"}");
+    Log::console(PSTR("Radio is not ready to begin"));
+    return;
+  }
   if (Radio::getInstance().begin() == 0)
   {
-    server.send(200, "application/json; charset=UTF-8", "{\"message\":\"Radio begun successfully\"}");
-    Log::console(PSTR("Radio begun successfully"));
+    server.send(200, "application/json; charset=UTF-8", "{\"message\":\"Radio begun successfully after /radioBegin request\"}");
+    Log::console(PSTR("Radio begun successfully after /radioBegin request"));
     return;
   }
   server.send(200, "application/json; charset=UTF-8", "{\"message\":\"An error occurred while trying to start the Radio\"}");
