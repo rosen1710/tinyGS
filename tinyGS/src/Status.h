@@ -28,9 +28,11 @@
 
 struct PacketInfo {
   String time = "Waiting";
+  String encoded_message = "";
+  String decoded_message = "";
   float rssi = 0;
   float snr = 0;
-  float frequencyerror = 0;    // Hz 
+  float frequencyerror = 0; // Hz
   bool crc_error = false;
 };
 

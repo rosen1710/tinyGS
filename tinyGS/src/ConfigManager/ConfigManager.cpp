@@ -153,6 +153,8 @@ void ConfigManager::handleGetAllPackets()
   for (size_t i = 0; i < status.allPackets.size(); i++)
   {
     string += "{\"time\":\"" + status.allPackets.at(i).time
+      + "\",\"encoded_message\":\"" + status.allPackets.at(i).encoded_message
+      + "\",\"decoded_message\":\"" + status.allPackets.at(i).decoded_message
       + "\",\"rssi\":" + status.allPackets.at(i).rssi
       + ",\"snr\":" + status.allPackets.at(i).snr
       + ",\"frequencyerror\":" + status.allPackets.at(i).frequencyerror
@@ -345,7 +347,15 @@ void ConfigManager::handleRefreshConsole()
     }
     else
     {
-      Log::console(PSTR("%s"), F("Command still not supported in web serial console!"));
+      // Log::console(PSTR("%s"), F("Command still not supported in web serial console!"));
+      if (Radio::getInstance().sendTx((uint8_t *) svalue.c_str(), strlen(svalue.c_str())) == 0)
+      {
+        Log::console(PSTR("%s"), F("Message was sent successfully"));
+      }
+      else
+      {
+        Log::console(PSTR("%s"), F("An error occurred while sending the message!"));
+      }
     }
   }
 
