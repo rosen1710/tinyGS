@@ -345,8 +345,6 @@ uint8_t Radio::listen()
     Log::console(PSTR("Packet (%u bytes):\n\t - Encoded: %s\n\t - Decoded: %s"), respLen, byteStr, status.lastPacketInfo.decoded_message.c_str());
     delete[] byteStr;
 
-    status.allPackets.push_back(status.lastPacketInfo);
-
     if (allow_decode) {
       String modo=status.modeminfo.modem_mode;
       if (modo=="FSK") {
@@ -437,6 +435,8 @@ uint8_t Radio::listen()
   delete[] respFrame;
 
   noisyInterrupt = false;
+
+  status.allPackets.push_back(status.lastPacketInfo);
 
   // put module back to listen mode
   startRx();
